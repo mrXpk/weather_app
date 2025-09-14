@@ -31,8 +31,8 @@ A beautiful, modern weather application built with React Native and Expo. Get re
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/weather-app.git
-   cd weather-app
+   git clone https://github.com/mrXpk/weather_app.git
+   cd weather_app
    ```
 
 2. **Install dependencies**
