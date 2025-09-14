@@ -1,13 +1,15 @@
 import React from 'react';
-import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { weatherService } from '../services/weatherService';
+import { View, Text, StyleSheet, ScrollView, Image } from 'react-native';
 import { ForecastDay } from '../types/weather';
+import { weatherService } from '../services/weatherService';
+import { Colors, Typography, Spacing, BorderRadius } from '../constants/theme';
 
 interface ForecastProps {
   data: ForecastDay[];
+  compact?: boolean;
 }
 
-export function Forecast({ data }: ForecastProps) {
+export function Forecast({ data, compact = false }: ForecastProps) {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     const today = new Date();
@@ -22,6 +24,18 @@ export function Forecast({ data }: ForecastProps) {
       return date.toLocaleDateString('en-US', { weekday: 'short' });
     }
   };
+
+  if (compact) {
+    return (
+      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+        <View style={styles.compactContainer}>
+          {data.map((day, index) => (
+            <ForecastCard key={index} day={day} date={formatDate(day.date)} compact />
+          ))}
+        </View>
+      </ScrollView>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -40,9 +54,26 @@ export function Forecast({ data }: ForecastProps) {
 interface ForecastCardProps {
   day: ForecastDay;
   date: string;
+  compact?: boolean;
 }
 
-function ForecastCard({ day, date }: ForecastCardProps) {
+function ForecastCard({ day, date, compact = false }: ForecastCardProps) {
+  if (compact) {
+    return (
+      <View style={styles.compactCard}>
+        <Text style={styles.compactDate}>{date}</Text>
+        <Image
+          source={{ uri: weatherService.getWeatherIconUrl(day.weather.icon) }}
+          style={styles.compactIcon}
+        />
+        <View style={styles.compactTempContainer}>
+          <Text style={styles.compactMaxTemp}>{Math.round(day.temp.max)}°</Text>
+          <Text style={styles.compactMinTemp}>{Math.round(day.temp.min)}°</Text>
+        </View>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.card}>
       <Text style={styles.date}>{date}</Text>
@@ -65,74 +96,100 @@ function ForecastCard({ day, date }: ForecastCardProps) {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: 'white',
-    borderRadius: 16,
-    padding: 20,
-    marginHorizontal: 16,
-    marginVertical: 8,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.lg,
+    marginHorizontal: Spacing.md,
+    marginVertical: Spacing.sm,
+  },
+  compactContainer: {
+    flexDirection: 'row',
+    paddingHorizontal: Spacing.md,
+    gap: Spacing.md,
   },
   title: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 16,
+    ...Typography.h3,
+    marginBottom: Spacing.md,
   },
   forecastContainer: {
     flexDirection: 'row',
-    gap: 12,
+    gap: Spacing.md,
   },
   card: {
     width: 120,
     alignItems: 'center',
-    backgroundColor: '#f8f9fa',
-    borderRadius: 12,
-    padding: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: BorderRadius.md,
+    padding: Spacing.md,
+  },
+  compactCard: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: BorderRadius.md,
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.sm,
+    minWidth: 60,
+    marginHorizontal: 4,
   },
   date: {
-    fontSize: 14,
+    ...Typography.caption,
     fontWeight: '600',
-    color: '#333',
-    marginBottom: 8,
+    marginBottom: Spacing.sm,
+  },
+  compactDate: {
+    ...Typography.caption,
+    fontSize: 12,
+    marginBottom: Spacing.xs,
   },
   icon: {
     width: 50,
     height: 50,
-    marginBottom: 8,
+    marginBottom: Spacing.sm,
+  },
+  compactIcon: {
+    width: 32,
+    height: 32,
+    marginVertical: Spacing.xs,
   },
   condition: {
-    fontSize: 12,
-    color: '#666',
+    ...Typography.caption,
     textAlign: 'center',
-    marginBottom: 8,
+    marginBottom: Spacing.sm,
   },
   tempContainer: {
     flexDirection: 'row',
-    gap: 8,
-    marginBottom: 8,
+    gap: Spacing.sm,
+    marginBottom: Spacing.sm,
+  },
+  compactTempContainer: {
+    alignItems: 'center',
+    marginTop: Spacing.xs,
   },
   maxTemp: {
-    fontSize: 16,
+    ...Typography.body,
     fontWeight: '600',
-    color: '#333',
   },
   minTemp: {
-    fontSize: 16,
-    color: '#999',
+    ...Typography.body,
+    opacity: 0.7,
+  },
+  compactMaxTemp: {
+    ...Typography.caption,
+    fontWeight: '600',
+    fontSize: 14,
+  },
+  compactMinTemp: {
+    ...Typography.caption,
+    opacity: 0.7,
+    fontSize: 12,
   },
   details: {
     alignItems: 'center',
   },
   detailText: {
+    ...Typography.caption,
     fontSize: 10,
-    color: '#999',
     textAlign: 'center',
+    opacity: 0.7,
   },
 });
