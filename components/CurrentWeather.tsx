@@ -1,8 +1,10 @@
-import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { weatherService } from '../services/weatherService';
+import { View, Text, StyleSheet, Image, TouchableOpacity, ViewStyle, TextStyle, ImageStyle } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { WeatherData } from '../types/weather';
+import { weatherService } from '../services/weatherService';
+import { GlassCard } from './GlassCard';
+import { Colors, Typography, Spacing, BorderRadius } from '../constants/theme';
 
 interface CurrentWeatherProps {
   data: WeatherData;
@@ -15,163 +17,151 @@ export function CurrentWeather({ data, onRefresh, isLoading }: CurrentWeatherPro
 
   return (
     <View style={styles.container}>
-      {/* Header with location and refresh */}
-      <View style={styles.header}>
-        <View style={styles.locationContainer}>
-          <Ionicons name="location-outline" size={20} color="#666" />
+      {/* Main Weather Card */}
+      <GlassCard style={styles.mainCard}>
+        {/* Location Header */}
+        <View style={styles.locationHeader}>
           <Text style={styles.locationText}>
             {location.name}, {location.country}
           </Text>
+          <TouchableOpacity onPress={onRefresh} disabled={isLoading} style={styles.refreshButton}>
+            <Ionicons 
+              name="refresh-outline" 
+              size={24} 
+              color={isLoading ? Colors.text.tertiary : Colors.text.primary} 
+            />
+          </TouchableOpacity>
         </View>
-        <TouchableOpacity onPress={onRefresh} disabled={isLoading}>
-          <Ionicons 
-            name="refresh-outline" 
-            size={24} 
-            color={isLoading ? "#ccc" : "#666"} 
-          />
-        </TouchableOpacity>
-      </View>
 
-      {/* Main weather display */}
-      <View style={styles.mainWeather}>
-        <Image
-          source={{ uri: weatherService.getWeatherIconUrl(current.weather.icon) }}
-          style={styles.weatherIcon}
-        />
-        <Text style={styles.temperature}>{current.temp}°</Text>
-        <Text style={styles.description}>{current.weather.description}</Text>
-        <Text style={styles.feelsLike}>Feels like {current.feels_like}°</Text>
-      </View>
-
-      {/* Weather details */}
-      <View style={styles.detailsContainer}>
-        <View style={styles.detailRow}>
-          <WeatherDetail
-            icon="water-outline"
-            label="Humidity"
-            value={`${current.humidity}%`}
-          />
-          <WeatherDetail
-            icon="speedometer-outline"
-            label="Pressure"
-            value={`${current.pressure} hPa`}
-          />
+        {/* Main Temperature Display */}
+        <View style={styles.temperatureSection}>
+          <View style={styles.weatherIconContainer}>
+            <Image
+              source={{ uri: weatherService.getWeatherIconUrl(current.weather.icon) }}
+              style={styles.weatherIcon}
+            />
+            <View style={styles.rainDrops}>
+              {/* Add animated rain drops effect here if needed */}
+            </View>
+          </View>
+          
+          <View style={styles.temperatureContainer}>
+            <Text style={styles.temperature}>{current.temp}°</Text>
+            <Text style={styles.description}>{current.weather.description}</Text>
+            <Text style={styles.feelsLike}>Feels like {current.feels_like}°</Text>
+          </View>
         </View>
-        <View style={styles.detailRow}>
-          <WeatherDetail
-            icon="eye-outline"
-            label="Visibility"
-            value={`${(current.visibility / 1000).toFixed(1)} km`}
-          />
-          <WeatherDetail
-            icon="flag-outline"
-            label="Wind"
-            value={`${current.wind_speed} m/s`}
-          />
-        </View>
+      </GlassCard>
+
+      {/* Weather Details Grid */}
+      <View style={styles.detailsGrid}>
+        <GlassCard style={styles.detailCard}>
+          <Ionicons name="water-outline" size={24} color={Colors.weather.cloudy} />
+          <Text style={styles.detailValue}>{current.humidity}%</Text>
+          <Text style={styles.detailLabel}>Humidity</Text>
+        </GlassCard>
+        
+        <GlassCard style={styles.detailCard}>
+          <Ionicons name="speedometer-outline" size={24} color={Colors.weather.cloudy} />
+          <Text style={styles.detailValue}>{current.pressure}</Text>
+          <Text style={styles.detailLabel}>hPa</Text>
+        </GlassCard>
+        
+        <GlassCard style={styles.detailCard}>
+          <Ionicons name="eye-outline" size={24} color={Colors.weather.cloudy} />
+          <Text style={styles.detailValue}>{(current.visibility / 1000).toFixed(1)}</Text>
+          <Text style={styles.detailLabel}>km</Text>
+        </GlassCard>
+        
+        <GlassCard style={styles.detailCard}>
+          <Ionicons name="flag-outline" size={24} color={Colors.weather.cloudy} />
+          <Text style={styles.detailValue}>{current.wind_speed}</Text>
+          <Text style={styles.detailLabel}>m/s</Text>
+        </GlassCard>
       </View>
-    </View>
-  );
-}
-
-interface WeatherDetailProps {
-  icon: any;
-  label: string;
-  value: string;
-}
-
-function WeatherDetail({ icon, label, value }: WeatherDetailProps) {
-  return (
-    <View style={styles.detail}>
-      <Ionicons name={icon} size={20} color="#666" />
-      <Text style={styles.detailLabel}>{label}</Text>
-      <Text style={styles.detailValue}>{value}</Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: 'white',
-    borderRadius: 16,
-    padding: 20,
-    marginHorizontal: 16,
-    marginVertical: 8,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  header: {
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.lg,
+  } as ViewStyle,
+  mainCard: {
+    marginBottom: Spacing.lg,
+    paddingVertical: Spacing.xl,
+  } as ViewStyle,
+  locationHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 20,
-  },
-  locationContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
+    marginBottom: Spacing.xl,
+  } as ViewStyle,
   locationText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-    marginLeft: 4,
-  },
-  mainWeather: {
+    ...Typography.location,
+    textAlign: 'center',
+    flex: 1,
+  } as TextStyle,
+  refreshButton: {
+    padding: Spacing.sm,
+    borderRadius: BorderRadius.round,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+  } as ViewStyle,
+  temperatureSection: {
     alignItems: 'center',
-    marginBottom: 30,
-  },
+  } as ViewStyle,
+  weatherIconContainer: {
+    position: 'relative',
+    marginBottom: Spacing.lg,
+  } as ViewStyle,
   weatherIcon: {
-    width: 100,
-    height: 100,
-  },
-  temperature: {
-    fontSize: 72,
-    fontWeight: '300',
-    color: '#333',
-    marginTop: -10,
-  },
-  description: {
-    fontSize: 18,
-    color: '#666',
-    textTransform: 'capitalize',
-    marginTop: -5,
-  },
-  feelsLike: {
-    fontSize: 14,
-    color: '#999',
-    marginTop: 4,
-  },
-  detailsContainer: {
-    gap: 16,
-  },
-  detailRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  detail: {
-    flex: 1,
-    flexDirection: 'row',
+    width: 120,
+    height: 120,
+  } as ImageStyle,
+  rainDrops: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  } as ViewStyle,
+  temperatureContainer: {
     alignItems: 'center',
-    backgroundColor: '#f8f9fa',
-    padding: 12,
-    borderRadius: 8,
-    marginHorizontal: 4,
-  },
-  detailLabel: {
-    fontSize: 12,
-    color: '#666',
-    marginLeft: 8,
-    flex: 1,
-  },
+  } as ViewStyle,
+  temperature: {
+    ...Typography.temperature,
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
+  } as TextStyle,
+  description: {
+    ...Typography.h2,
+    textTransform: 'capitalize',
+    marginTop: Spacing.sm,
+    opacity: 0.9,
+  } as TextStyle,
+  feelsLike: {
+    ...Typography.body,
+    marginTop: Spacing.xs,
+  } as TextStyle,
+  detailsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    gap: Spacing.md,
+  } as ViewStyle,
+  detailCard: {
+    width: '47%',
+    alignItems: 'center',
+    paddingVertical: Spacing.lg,
+  } as ViewStyle,
   detailValue: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#333',
-  },
+    ...Typography.h2,
+    marginTop: Spacing.sm,
+    marginBottom: Spacing.xs,
+  } as TextStyle,
+  detailLabel: {
+    ...Typography.caption,
+  } as TextStyle,
 });
